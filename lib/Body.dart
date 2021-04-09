@@ -69,25 +69,23 @@ class _BodyState extends State<Body> {
     }
   }
 
-  Future<void> getData() {
+  void getData() async {
     for (int i = 0; i < 10; i++) {
-      print("${songsMap[i]}");
+      var songMap = Map<String, dynamic>();
+      await cloudStore.doc("song$i").get().then((doc) {
+        songMap = doc.data();
+        songsMap['$i'] = songMap;
+      }).catchError((error) => print(error));
     }
+    setState(() {
+      print(songsMap);
+      isEmpty = true;
+    });
   }
 
   @override
   void initState() {
-    for (int i = 0; i < 10; i++) {
-      var songMap = Map<String, dynamic>();
-      cloudStore.doc("song$i").get().then((doc) {
-        songMap = doc.data();
-        songsMap['$i'] = songMap;
-        setState(() {
-          print(songsMap);
-          isEmpty = true;
-        });
-      }).catchError((error) => print(error));
-    }
+    getData();
     super.initState();
     // print(songsMap);
   }
@@ -191,7 +189,7 @@ class _TasteCategoriesState extends State<TasteCategories> {
         child: SizedBox(
           height: 200,
           child: ListView.builder(
-              scrollDirection: Axis.horizontal,
+              scrollDirection: Axis.vertical,
               itemCount: cartegoriesList.length,
               itemBuilder: (context, index) =>
                   buildCategory(index, fwidth, fheight)),
@@ -217,9 +215,7 @@ class _TasteCategoriesState extends State<TasteCategories> {
                 onPressed: () {
                   for (int i = 0; i < widget.cartegoriesMap.length; i++) {
                     if (cartegoriesList[9] ==
-                        widget.cartegoriesMap['$i']['title']) {
-                      // kdfjldksfsjfskdljflsdkf
-                    }
+                        widget.cartegoriesMap['$i']['title']) {}
                   }
                 },
                 child: Image.asset("assets/images/RandomPlayIcon-nobg.png"),
