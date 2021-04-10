@@ -40,12 +40,12 @@ class MyApp extends StatelessWidget {
           ),
           bodyText1: TextStyle(
             color: Colors.black,
-            fontSize: 20.0,
+            fontSize: 15.0,
             fontWeight: FontWeight.bold,
           ),
           bodyText2: TextStyle(
             color: Colors.black,
-            fontSize: 15.0,
+            fontSize: 10.0,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -77,12 +77,12 @@ class MyApp extends StatelessWidget {
           ),
           bodyText1: TextStyle(
             color: Colors.white,
-            fontSize: 20.0,
+            fontSize: 15.0,
             fontWeight: FontWeight.bold,
           ),
           bodyText2: TextStyle(
             color: Colors.white,
-            fontSize: 15.0,
+            fontSize: 10.0,
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -160,7 +160,6 @@ class _HomePageState extends State<HomePage> {
           });
     }
 
-    print("$_error///$_initialized");
     if (_error) {
       print('error');
       // _showError();
@@ -168,7 +167,6 @@ class _HomePageState extends State<HomePage> {
       print('Loading');
       return Loading();
     } else {
-      print('Home');
       Timer(
           Duration(seconds: 3),
           () => Navigator.push(

@@ -18,7 +18,6 @@ class _HomeState extends State<Home> {
           appBar: AppBar(
             iconTheme: theme.primaryIconTheme,
             backgroundColor: theme.primaryColor,
-            title: Text("Title"),
             actions: [
               IconButton(
                 color: theme.accentColor,
@@ -67,7 +66,7 @@ class _HomeState extends State<Home> {
                     child: Text(
                       'Drawer Header',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: theme.textTheme.headline2.color,
                         fontSize: theme.textTheme.headline2.fontSize,
                         fontWeight: theme.textTheme.headline2.fontWeight,
                       ),

@@ -91,6 +91,7 @@ def parseText(string: list):
     for i in range(0, len(string)):
         a = string[i].split(" - ")
         b = a[3].split(":")
+        b[-1] = b[-1].replace("\n", "");
         res.append(mkdic(a[0], a[1], a[2], b))
     return res
 

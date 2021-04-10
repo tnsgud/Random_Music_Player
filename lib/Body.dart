@@ -78,7 +78,6 @@ class _BodyState extends State<Body> {
       }).catchError((error) => print(error));
     }
     setState(() {
-      print(songsMap);
       isEmpty = true;
     });
   }
@@ -93,6 +92,9 @@ class _BodyState extends State<Body> {
   @override
   Widget build(BuildContext context) {
     var theme = widget.theme;
+    var media = MediaQuery.of(context);
+    var width = media.size.width;
+    var height = media.size.height;
     // cloudStore = widget.store;
     return Scaffold(
       backgroundColor: theme.primaryColor,
@@ -106,9 +108,7 @@ class _BodyState extends State<Body> {
               style: theme.textTheme.headline3,
             ),
           ),
-          TasteCategories(
-            cartegoriesMap: songsMap,
-          ),
+          TasteCategories(cartegoriesMap: songsMap, theme: theme),
           TextButton(
             child: Text("youtube url 재생"),
             onPressed: () {
@@ -133,32 +133,46 @@ class _BodyState extends State<Body> {
           ),
         ],
       ),
-      // bottomNavigationBar: buildBottomNavigationBar(),
+      bottomNavigationBar: Container(
+        width: width,
+        height: height * 0.3,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [musicPlayerBar(theme), buildBottomNavigationBar(theme)],
+        ),
+      ),
     );
     ;
   }
 
-  // BottomNavigationBar buildBottomNavigationBar() {
-  //   return BottomNavigationBar(
-  //       onTap: (value) {
-  //         setState(() {
-  //           selectedIndex = value;
-  //         });
-  //       },
-  //       type: BottomNavigationBarType.fixed,
-  //       currentIndex: selectedIndex,
-  //       items: [
-  //         BottomNavigationBarItem(icon: Icon(Icons.error), label: "h"),
-  //         BottomNavigationBarItem(icon: Icon(Icons.error), label: "h"),
-  //         BottomNavigationBarItem(icon: Icon(Icons.error), label: "h"),
-  //       ]);
-  // }
+  Widget musicPlayerBar(ThemeData theme) {
+    return Row();
+  }
+
+  BottomNavigationBar buildBottomNavigationBar(ThemeData theme) {
+    return BottomNavigationBar(
+        backgroundColor: theme.primaryColor,
+        onTap: (value) {
+          setState(() {
+            selectedIndex = value;
+          });
+        },
+        selectedItemColor: theme.accentColor,
+        unselectedItemColor: Colors.grey,
+        currentIndex: selectedIndex,
+        items: [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: "홈"),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: "둘러보기"),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: "검색"),
+        ]);
+  }
 }
 
 class TasteCategories extends StatefulWidget {
-  TasteCategories({Key key, this.cartegoriesMap}) : super(key: key);
+  TasteCategories({Key key, this.cartegoriesMap, this.theme}) : super(key: key);
 
   Map<String, dynamic> cartegoriesMap;
+  ThemeData theme;
 
   @override
   _TasteCategoriesState createState() => _TasteCategoriesState();
@@ -187,7 +201,7 @@ class _TasteCategoriesState extends State<TasteCategories> {
       title: Padding(
         padding: EdgeInsets.all(5),
         child: SizedBox(
-          height: 200,
+          height: fheight * 0.2,
           child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: cartegoriesList.length,
@@ -201,36 +215,30 @@ class _TasteCategoriesState extends State<TasteCategories> {
 
   Widget buildCategory(int index, var width, var height) {
     return Container(
-      color: Colors.green,
-      width: 250,
-      height: 250,
-      child: Column(
-        children: [
-          Container(
-              color: Colors.red,
-              padding: const EdgeInsets.fromLTRB(10, 5, 10, 0),
-              width: width * 0.5,
-              height: height * 0.2,
-              child: TextButton(
-                onPressed: () {
-                  for (int i = 0; i < widget.cartegoriesMap.length; i++) {
-                    if (cartegoriesList[9] ==
-                        widget.cartegoriesMap['$i']['title']) {}
-                  }
-                },
-                child: Image.asset("assets/images/RandomPlayIcon-nobg.png"),
-              )),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(15, 10, 10, 0),
-            child: Text(
-              cartegoriesList[index],
-              maxLines: 2,
-              overflow: TextOverflow.fade,
-              softWrap: true,
-            ),
-          ),
-        ],
-      ),
-    );
+        width: width * 0.3,
+        height: height * 0.15,
+        child: TextButton(
+            onPressed: () {
+              for (int i = 0; i < widget.cartegoriesMap.length; i++) {
+                if (cartegoriesList[9] ==
+                    widget.cartegoriesMap['$i']['title']) {}
+              }
+            },
+            child: Column(
+              children: [
+                Image.network(
+                    "https://cdnimg.melon.co.kr/cm2/album/images/105/54/246/10554246_20210325161233_500.jpg?304eb9ed9c07a16ec6d6e000dc0e7d91/melon/resize/282/quality/80/optimize"),
+                Text(
+                  cartegoriesList[index],
+                  maxLines: 2,
+                  overflow: TextOverflow.fade,
+                  softWrap: true,
+                  textAlign: TextAlign.center,
+                  style: widget.theme.textTheme.bodyText2,
+                ),
+              ],
+            )
+            // child: Image.asset("assets/images/RandomPlayIcon-nobg.png"),
+            ));
   }
 }
