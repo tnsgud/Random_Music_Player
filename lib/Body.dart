@@ -126,7 +126,7 @@ class _BodyState extends State<Body> {
           TextButton(
             child: Text("downlaod music"),
             onPressed: () async {
-              var path = "${await _externalPath}/${songsMap['9']['title']}.m4a";
+              var path = "${await _externalPath}/${songsMap['9']['title']}.wav";
               await downloadMP3("${songsMap['9']['url']}", path);
               play(path);
             },
@@ -189,7 +189,7 @@ class _TasteCategoriesState extends State<TasteCategories> {
         child: SizedBox(
           height: 200,
           child: ListView.builder(
-              scrollDirection: Axis.vertical,
+              scrollDirection: Axis.horizontal,
               itemCount: cartegoriesList.length,
               itemBuilder: (context, index) =>
                   buildCategory(index, fwidth, fheight)),
