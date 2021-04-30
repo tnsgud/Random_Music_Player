@@ -14,7 +14,7 @@ class _LoadingState extends State<Loading> {
 
     FlutterStatusbarcolor.setNavigationBarColor(Theme.of(context).primaryColor);
     FlutterStatusbarcolor.setStatusBarColor(Theme.of(context).primaryColor);
-    if (Theme.of(context).primaryColor == Colors.black) {
+    if (theme.primaryColor == Colors.black) {
       FlutterStatusbarcolor.setStatusBarWhiteForeground(true);
     } else {
       FlutterStatusbarcolor.setStatusBarWhiteForeground(false);

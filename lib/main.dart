@@ -126,9 +126,9 @@ class _HomePageState extends State<HomePage> {
   void storagePermission() async {
     var status = await Permission.storage.status;
     if (status.isPermanentlyDenied) {
-      openAppSettings();
+      await openAppSettings();
     }
-    Permission.storage.request();
+    await Permission.storage.request();
   }
 
   @override
@@ -136,33 +136,36 @@ class _HomePageState extends State<HomePage> {
     var theme = Theme.of(context);
     void _showError() {
       showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              backgroundColor: theme.primaryColor,
-              title: Text(
-                'Error',
-                style: TextStyle(color: theme.accentColor),
-              ),
-              content: Text(
-                "에러가 발생했습니다.\n인터넷이 켜져있는지 확인해주세요.\n그래도 문제가 있다면 앱을\n재실행 해주시거나\n개발자에게 문의해주세요!",
-                style: theme.textTheme.bodyText1,
-              ),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child:
-                        Text('닫기', style: TextStyle(color: theme.accentColor)))
-              ],
-            );
-          });
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: theme.primaryColor,
+            title: Text(
+              'Error',
+              style: TextStyle(color: theme.accentColor),
+            ),
+            content: Text(
+              '에러가 발생했습니다.\n인터넷이 켜져있는지 확인해주세요.\n그래도 문제가 있다면 앱을\n재실행 해주시거나\n개발자에게 문의해주세요!',
+              style: theme.textTheme.bodyText1,
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  '닫기',
+                  style: TextStyle(color: theme.accentColor),
+                ),
+              )
+            ],
+          );
+        },
+      );
     }
 
     if (_error) {
-      print('error');
-      // _showError();
+      _showError();
     } else if (!_initialized) {
       print('Loading');
       return Loading();

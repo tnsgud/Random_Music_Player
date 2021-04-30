@@ -63,6 +63,9 @@ class _HomeState extends State<Home> {
               child: ListView(
                 children: [
                   DrawerHeader(
+                    decoration: BoxDecoration(
+                      color: theme.accentColor,
+                    ),
                     child: Text(
                       'Drawer Header',
                       style: TextStyle(
@@ -70,9 +73,6 @@ class _HomeState extends State<Home> {
                         fontSize: theme.textTheme.headline2.fontSize,
                         fontWeight: theme.textTheme.headline2.fontWeight,
                       ),
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.accentColor,
                     ),
                   ),
                   ListTile(

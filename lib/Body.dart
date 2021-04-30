@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
@@ -17,13 +18,13 @@ class Body extends StatefulWidget {
 class _BodyState extends State<Body> {
   int selectedIndex = 0;
   bool isEmpty = false;
-  var songsMap = Map<String, dynamic>();
+  var songsMap = <String, dynamic>{};
   AudioPlayer audioPlayer = AudioPlayer();
-  var cloudStore = FirebaseFirestore.instance.collection("songs");
+  var cloudStore = FirebaseFirestore.instance.collection('songs');
 
   void play(String path) async {
-    var durataion = audioPlayer.setFilePath("$path");
-    audioPlayer.play();
+    var durataion = audioPlayer.setFilePath('$path');
+    await audioPlayer.play();
   }
 
   Future<String> get _externalPath async {
@@ -53,8 +54,8 @@ class _BodyState extends State<Body> {
     var manifest = await yt.videos.streamsClient.getManifest('$vid');
     var streamInfo = manifest.audioOnly.withHighestBitrate();
     var size = streamInfo.size;
-    writeStream(streamInfo, '$path');
-    print("다운로드 완료");
+    await writeStream(streamInfo, '$path');
+    print('다운로드 완료');
   }
 
   Future<void> writeStream(var streamInfo, String path) async {
@@ -70,9 +71,12 @@ class _BodyState extends State<Body> {
   }
 
   void getData() async {
-    for (int i = 0; i < 10; i++) {
-      var songMap = Map<String, dynamic>();
-      await cloudStore.doc("song$i").get().then((doc) {
+    var file = File('../scripts/music.txt');
+    print(file.exists());
+    var random = Random();
+    for (var i = 0; i < 10; i++) {
+      var songMap = <String, dynamic>{};
+      await cloudStore.doc('song$i').get().then((doc) {
         songMap = doc.data();
         songsMap['$i'] = songMap;
       }).catchError((error) => print(error));
@@ -84,8 +88,8 @@ class _BodyState extends State<Body> {
 
   @override
   void initState() {
-    getData();
     super.initState();
+    getData();
     // print(songsMap);
   }
 
@@ -99,18 +103,19 @@ class _BodyState extends State<Body> {
     return Scaffold(
       backgroundColor: theme.primaryColor,
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            padding: EdgeInsets.fromLTRB(15, 0, 0, 0),
+            width: width,
+            padding: EdgeInsets.all(5.0),
             child: Text(
-              "내 취향인 가수의 노래",
+              '내 취향인 가수의 노래',
               style: theme.textTheme.headline3,
+              textAlign: TextAlign.start,
             ),
           ),
           TasteCategories(cartegoriesMap: songsMap, theme: theme),
           TextButton(
-            child: Text("youtube url 재생"),
             onPressed: () {
               if (audioPlayer.playing == true) {
                 audioPlayer.pause();
@@ -118,35 +123,93 @@ class _BodyState extends State<Body> {
                 audioPlayer.play();
               }
             },
+            child: Text('youtube url 재생'),
           ),
           TextButton(
-            child: Text("cloud store test"),
             onPressed: () => getData(),
+            child: Text('cloud store test'),
           ),
           TextButton(
-            child: Text("downlaod music"),
             onPressed: () async {
-              var path = "${await _externalPath}/${songsMap['9']['title']}.wav";
-              await downloadMP3("${songsMap['9']['url']}", path);
+              var path = '${await _externalPath}/${songsMap['9']['title']}.wav';
+              await downloadMP3('${songsMap['9']['url']}', path);
               play(path);
             },
+            child: Text('downlaod music'),
           ),
+          Container(
+            width: width - 20,
+            child: Card(
+              child: Text('SDfdsfsdfds'),
+            ),
+          )
         ],
       ),
-      bottomNavigationBar: Container(
+      bottomNavigationBar: // buildBottomNavigationBar(theme),
+          Container(
+        color: Colors.white,
         width: width,
-        height: height * 0.3,
+        height: height * 0.18,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
-          children: [musicPlayerBar(theme), buildBottomNavigationBar(theme)],
+          children: [
+            musicPlayerBar(theme, width, height),
+            buildBottomNavigationBar(theme)
+          ],
         ),
       ),
     );
-    ;
   }
 
-  Widget musicPlayerBar(ThemeData theme) {
-    return Row();
+  Widget musicPlayerBar(ThemeData theme, var width, var height) {
+    return Container(
+        color: Colors.blue,
+        width: width,
+        height: height * 0.1,
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Row(
+            children: [
+              // Container(
+              //     width: width * 0.15,
+              //     child: Image.network(
+              //         "https://cdnimg.melon.co.kr/cm2/album/images/105/54/246/10554246_20210325161233_500.jpg?304eb9ed9c07a16ec6d6e000dc0e7d91/melon/resize/282/quality/80/optimize")),
+              Container(
+                  color: Colors.black,
+                  width: width * 0.73,
+                  child: Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: Column(
+                      children: [
+                        Text(
+                            '${songsMap['1']['singer']} - ${songsMap['1']['title']}')
+                      ],
+                    ),
+                  )),
+              Container(
+                  width: width * 0.08,
+                  child: IconButton(
+                      icon: Icon(Icons.arrow_back_ios),
+                      onPressed: () {
+                        print('back');
+                      })),
+              Container(
+                  width: width * 0.08,
+                  child: IconButton(
+                      icon: Icon(Icons.play_arrow),
+                      onPressed: () {
+                        print('play');
+                      })),
+              Container(
+                  width: width * 0.08,
+                  child: IconButton(
+                      icon: Icon(Icons.arrow_forward_ios),
+                      onPressed: () {
+                        print('forward');
+                      })),
+            ],
+          ),
+        ));
   }
 
   BottomNavigationBar buildBottomNavigationBar(ThemeData theme) {
@@ -161,9 +224,10 @@ class _BodyState extends State<Body> {
         unselectedItemColor: Colors.grey,
         currentIndex: selectedIndex,
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "홈"),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: "둘러보기"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "검색"),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: '둘러보기'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
+          BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
         ]);
   }
 }
@@ -187,7 +251,7 @@ class _TasteCategoriesState extends State<TasteCategories> {
     var fwidth = media.size.width;
     var fheight = media.size.height;
 
-    if (0 < cartegoriesList.length) {
+    if (cartegoriesList.isNotEmpty) {
       for (var i = 0; i < widget.cartegoriesMap.length; i++) {
         cartegoriesList.removeAt(0);
       }
@@ -219,7 +283,7 @@ class _TasteCategoriesState extends State<TasteCategories> {
         height: height * 0.15,
         child: TextButton(
             onPressed: () {
-              for (int i = 0; i < widget.cartegoriesMap.length; i++) {
+              for (num i = 0; i < widget.cartegoriesMap.length; i++) {
                 if (cartegoriesList[9] ==
                     widget.cartegoriesMap['$i']['title']) {}
               }
@@ -227,7 +291,7 @@ class _TasteCategoriesState extends State<TasteCategories> {
             child: Column(
               children: [
                 Image.network(
-                    "https://cdnimg.melon.co.kr/cm2/album/images/105/54/246/10554246_20210325161233_500.jpg?304eb9ed9c07a16ec6d6e000dc0e7d91/melon/resize/282/quality/80/optimize"),
+                    'https://cdnimg.melon.co.kr/cm2/album/images/105/54/246/10554246_20210325161233_500.jpg?304eb9ed9c07a16ec6d6e000dc0e7d91/melon/resize/282/quality/80/optimize'),
                 Text(
                   cartegoriesList[index],
                   maxLines: 2,
