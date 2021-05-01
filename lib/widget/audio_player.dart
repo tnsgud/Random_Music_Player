@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:just_audio/just_audio.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class CustomAudioPlayer extends AudioPlayer {

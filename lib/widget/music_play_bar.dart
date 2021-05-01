@@ -37,8 +37,8 @@ class _MusicPlayerBarState extends State<MusicPlayerBar> {
   Widget build(BuildContext context) {
     return Container(
         color: Colors.blue,
-        width: widget.maxWidth,
-        height: widget.maxHeight * 0.1,
+        width: maxWidth,
+        height: maxHeight * 0.1,
         child: Padding(
           padding: const EdgeInsets.all(5.0),
           child: Row(
@@ -54,8 +54,9 @@ class _MusicPlayerBarState extends State<MusicPlayerBar> {
                     padding: const EdgeInsets.all(2.0),
                     child: Column(
                       children: [
-                        Text(
-                            '${widget.songsMap['1']['singer']} - ${widget.songsMap['1']['title']}')
+                        Text('hello world')
+                        // Text(
+                        //     '${widget.songsMap['1']['singer']} - ${widget.songsMap['1']['title']}')
                       ],
                     ),
                   )),

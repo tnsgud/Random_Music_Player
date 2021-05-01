@@ -118,9 +118,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
+    super.initState();
     initializeFlutterFire();
     storagePermission();
-    super.initState();
   }
 
   void storagePermission() async {

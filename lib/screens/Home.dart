@@ -1,6 +1,6 @@
 // import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:random_music_player/Body.dart';
+import 'package:random_music_player/body.dart';
 
 class Home extends StatefulWidget {
   @override

@@ -1,6 +1,6 @@
-# flutter_application_1
+# Random Music Player
 
-A new Flutter project.
+This is random music player readme.
 
 ## Getting Started
 

@@ -31,9 +31,9 @@ dependencies:
     cupertino_icons: ^1.0.0
     # flutter_ffmpeg: ^0.4.0
     just_audio: ^0.7.3
-    firebase_core: ^1.0.3
-    cloud_firestore: ^1.0.4
+    firebase_core: ^1.1.0
     path_provider: ^2.0.1
+    cloud_firestore: ^1.0.4
     permission_handler: ^6.1.1
     youtube_explode_dart: ^1.9.1
     flutter_native_splash: ^1.1.7+1

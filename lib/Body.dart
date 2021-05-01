@@ -17,23 +17,24 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  int selectedIndex;
+  File file;
   bool isEmpty;
-  Map<String, dynamic> songsMap;
   Random random;
+  int selectedIndex;
+  Map<String, dynamic> songsMap;
   CustomAudioPlayer audioPlayer;
   CollectionReference cloudStore;
 
   @override
   void initState() {
     super.initState();
-    getData();
-    selectedIndex = 0;
     isEmpty = true;
-    songsMap = <String, dynamic>{};
     random = Random();
+    selectedIndex = 0;
+    songsMap = <String, dynamic>{};
     audioPlayer = CustomAudioPlayer();
     cloudStore = FirebaseFirestore.instance.collection('songs');
+    getData();
   }
 
   Future<String> get _externalPath async {
@@ -42,14 +43,14 @@ class _BodyState extends State<Body> {
   }
 
   Future<void> getData() async {
-    var file = File('../scripts/music.txt');
-    var len = await file.readAsLines();
-    for (var i = 0; i < len.length; i++) {
-      var songMap = <String, dynamic>{};
-      await cloudStore.doc('song$i').get().then((doc) {
-        songMap = doc.data();
-        songsMap['$i'] = songMap;
-      }).catchError((error) => print(error));
+    var docs;
+    var index = 0;
+    await cloudStore.get().then((value) => docs = value.docs);
+
+    for (var doc in docs) {
+      var songMap = doc.data();
+      songsMap['$index'] = songMap;
+      index++;
     }
     setState(() {
       isEmpty = false;
@@ -94,7 +95,8 @@ class _BodyState extends State<Body> {
           ),
           TextButton(
             onPressed: () async {
-              var path = '$_externalPath/${songsMap['9']['title']}.wav';
+              var path =
+                  '${_externalPath.toString()}/${songsMap['9']['title']}.wav';
               await audioPlayer.startPlay('${songsMap['9']['url']}', path);
             },
             child: Text('downlaod music'),
@@ -121,7 +123,7 @@ class _BodyState extends State<Body> {
               maxWidth: maxWidth,
               maxHeight: maxHeight,
             ),
-            buildBottomNavigationBar(theme)
+            //buildBottomNavigationBar(theme)
           ],
         ),
       ),
