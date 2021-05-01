@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'screens/Loading.dart';
+import 'screens/loding.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:random_music_player/screens/Home.dart';
+import 'package:random_music_player/screens/home.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 void main() {
