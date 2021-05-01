@@ -103,7 +103,7 @@ class _HomePageState extends State<HomePage> {
   bool _initialized = false;
   bool _error = false;
 
-  void initializeFlutterFire() async {
+  Future<void> initializeFlutterFire() async {
     try {
       await Firebase.initializeApp();
       setState(() {
