@@ -38,7 +38,6 @@ dependencies:
     youtube_explode_dart: ^1.9.1
     flutter_native_splash: ^1.1.7+1
     flutter_statusbarcolor: ^0.2.3
-    flutter_launcher_icons: ^0.9.0
 
 
 dev_dependencies:
@@ -86,7 +85,3 @@ flutter:
     #
     # For details regarding fonts from package dependencies,
     # see https://flutter.dev/custom-fonts/#from-packages
-flutter_icons:
-    android: true
-    ios: true
-    image_path: "assets/images/RandomPlayIcon512x512.png"

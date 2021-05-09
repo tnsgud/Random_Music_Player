@@ -37,24 +37,38 @@ class _CategoriesState extends State<Categories> {
     var fwidth = media.size.width;
     var fheight = media.size.height;
 
-    return FutureBuilder(
-      // future: body.getData(),
-      builder: (context, snapshot) {
-        return ListTile(
-          title: Padding(
-            padding: EdgeInsets.all(5),
-            child: SizedBox(
-              height: fheight * 0.2,
-              child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: categoriesList.length,
-                  itemBuilder: (context, index) =>
-                      buildCategory(index, fwidth, fheight)),
-            ),
-          ),
-          onTap: () {},
-        );
-      },
+    return Container(
+      width: fwidth - 20,
+      height: fheight * 0.2,
+      child: ListView.builder(
+          itemCount: categoriesList.length,
+          itemBuilder: (context, index) =>
+              buildCategory(index, fwidth, fheight)),
+    );
+
+    // return FutureBuilder(
+    //   // future: body.getData(),
+    //   builder: (context, snapshot) {
+    //     return buildListTile(fheight, fwidth);
+    //   },
+    //   // future: ,
+    // );
+  }
+
+  ListTile buildListTile(double fheight, double fwidth) {
+    return ListTile(
+      title: Padding(
+        padding: EdgeInsets.all(5),
+        child: SizedBox(
+          height: fheight * 0.2,
+          child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: categoriesList.length,
+              itemBuilder: (context, index) =>
+                  buildCategory(index, fwidth, fheight)),
+        ),
+      ),
+      onTap: () {},
     );
   }
 

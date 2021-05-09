@@ -10,6 +10,17 @@ init()
 # Back: BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET.
 # Style: DIM, NORMAL, BRIGHT, RESET_ALL
 
+def delete_collection(coll_ref, batch_size):
+    docs = coll_ref.limit(batch_size).stream()
+    deleted = 0
+
+    for doc in docs:
+        print(f'Deleting doc {doc.id} => {doc.to_dict()}')
+        doc.reference.delete()
+        deleted = deleted + 1
+
+    if deleted >= batch_size:
+        return delete_collection(coll_ref, batch_size)
 
 def startFirebase():
     """
@@ -23,6 +34,7 @@ def startFirebase():
 
     db = firestore.client()
     print(Fore.GREEN+"firebase"+"연결성공"+Fore.WHITE)
+    delete_collection(db.collection(u'songs'), 100)
     return db
 
 
@@ -101,7 +113,7 @@ def setData(song: list, db):
     Cloud store에 데이터를 업로드하는 메소드 
     """
     for i in range(0, len(song)):
-        doc_ref = db.collection(u"songs").document(u"song{0}".format(i))
+        doc_ref = db.collection(u"songs").document(u"song{0:0>5}".format(i))
         doc_ref.set({
             u'id': i,
             u'title': u'{0}'.format(song[i]['title']),

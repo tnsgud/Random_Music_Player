@@ -7,8 +7,8 @@
 
     <application
         android:name="io.flutter.app.FlutterApplication"
-        android:label="flutter_application_1"
-        android:icon="@mipmap/ic_launcher">
+        android:label="Random music Player"
+        android:icon="@mipmap/app_icon">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

@@ -81,6 +81,7 @@ class _BodyState extends State<Body> {
           Categories(categoriesMap: songsMap, theme: theme),
           TextButton(
             onPressed: () {
+              // print(audioPlayer.);
               if (audioPlayer.playing == true) {
                 audioPlayer.pause();
               } else {
@@ -95,8 +96,8 @@ class _BodyState extends State<Body> {
           ),
           TextButton(
             onPressed: () async {
-              var path =
-                  '${_externalPath.toString()}/${songsMap['9']['title']}.wav';
+              var path = '${await _externalPath}/${songsMap['9']['title']}.wav';
+              // print(songsMap);
               await audioPlayer.startPlay('${songsMap['9']['url']}', path);
             },
             child: Text('downlaod music'),

@@ -1,11 +1,9 @@
 import firebase
 
-
 choice = input("할 작업을 선택해주세요.\n1:데이터 업로드\n2:텍스트파일 수정 : \n")
 
 if choice == '1':
-    firebase.setData(firebase.parseText(
-        firebase.readFile("./musics.txt")), firebase.startFirebase())
+    firebase.setData(firebase.parseText(firebase.readFile('./musics.txt')), firebase.startFirebase())    
 elif choice == '2':
     check = input("musicx.txt파일을 변경할것 입니까? (Y/n): ")
     if check == "y" or check == 'Y':
