@@ -17,7 +17,7 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  File file;
+  String path;
   bool isEmpty;
   Random random;
   int selectedIndex;
@@ -28,6 +28,7 @@ class _BodyState extends State<Body> {
   @override
   void initState() {
     super.initState();
+    path = null;
     isEmpty = true;
     random = Random();
     selectedIndex = 0;
@@ -78,11 +79,13 @@ class _BodyState extends State<Body> {
               textAlign: TextAlign.start,
             ),
           ),
-          Categories(categoriesMap: songsMap, theme: theme),
+          isEmpty
+              ? Text('데이터가 없습니다.')
+              : Categories(categoriesMap: songsMap, theme: theme),
           TextButton(
             onPressed: () {
-              // print(audioPlayer.);
-              if (audioPlayer.playing == true) {
+              print('audioPlayer => ${audioPlayer.playing}');
+              if (audioPlayer.playing) {
                 audioPlayer.pause();
               } else {
                 audioPlayer.play();
@@ -91,14 +94,30 @@ class _BodyState extends State<Body> {
             child: Text('youtube url 재생'),
           ),
           TextButton(
-            onPressed: () => getData(),
-            child: Text('cloud store test'),
+            onPressed: () async {},
+            child: Text('backward'),
+          ),
+          TextButton(
+            onPressed: () async {},
+            child: Text('forward'),
           ),
           TextButton(
             onPressed: () async {
-              var path = '${await _externalPath}/${songsMap['9']['title']}.wav';
-              // print(songsMap);
-              await audioPlayer.startPlay('${songsMap['9']['url']}', path);
+              var file = File(path);
+              try {
+                await file.delete();
+              } catch (e) {
+                print(e);
+              }
+            },
+            child: Text('delete file'),
+          ),
+          TextButton(
+            onPressed: () async {
+              var id = random.nextInt(songsMap.length);
+              print('$id => ${songsMap['$id']['title']}');
+              path = '${await _externalPath}/${songsMap['$id']['title']}.wav';
+              await audioPlayer.startPlay('${songsMap['$id']['url']}', path);
             },
             child: Text('downlaod music'),
           ),

@@ -170,10 +170,10 @@ class _HomePageState extends State<HomePage> {
       print('Loading');
       return Loading();
     } else {
-      Timer(
-          Duration(seconds: 3),
-          () => Navigator.push(
-              context, MaterialPageRoute(builder: (context) => Home())));
+      Timer(Duration(seconds: 3), () async {
+        await Navigator.push(
+            context, MaterialPageRoute(builder: (context) => Home()));
+      });
     }
 
     return Loading();

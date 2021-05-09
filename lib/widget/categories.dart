@@ -41,6 +41,7 @@ class _CategoriesState extends State<Categories> {
       width: fwidth - 20,
       height: fheight * 0.2,
       child: ListView.builder(
+          scrollDirection: Axis.horizontal,
           itemCount: categoriesList.length,
           itemBuilder: (context, index) =>
               buildCategory(index, fwidth, fheight)),
@@ -55,22 +56,22 @@ class _CategoriesState extends State<Categories> {
     // );
   }
 
-  ListTile buildListTile(double fheight, double fwidth) {
-    return ListTile(
-      title: Padding(
-        padding: EdgeInsets.all(5),
-        child: SizedBox(
-          height: fheight * 0.2,
-          child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: categoriesList.length,
-              itemBuilder: (context, index) =>
-                  buildCategory(index, fwidth, fheight)),
-        ),
-      ),
-      onTap: () {},
-    );
-  }
+  // ListTile buildListTile(double fheight, double fwidth) {
+  //   return ListTile(
+  //     title: Padding(
+  //       padding: EdgeInsets.all(5),
+  //       child: SizedBox(
+  //         height: fheight * 0.2,
+  //         child: ListView.builder(
+  //             scrollDirection: Axis.horizontal,
+  //             itemCount: categoriesList.length,
+  //             itemBuilder: (context, index) =>
+  //                 buildCategory(index, fwidth, fheight)),
+  //       ),
+  //     ),
+  //     onTap: () {},
+  //   );
+  // }
 
   Widget buildCategory(int index, var width, var height) {
     return Container(
