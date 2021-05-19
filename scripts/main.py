@@ -1,6 +1,6 @@
 import firebase
 
-choice = input("할 작업을 선택해주세요.\n1:데이터 업로드\n2:텍스트파일 수정 : \n")
+choice = input("할 작업을 선택해주세요.\n1:데이터 업로드\n2:텍스트파일 수정 \n")
 
 if choice == '1':
     firebase.setData(firebase.parseText(firebase.readFile('./musics.txt')), firebase.startFirebase())    
