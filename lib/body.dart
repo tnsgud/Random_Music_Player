@@ -5,8 +5,8 @@ import 'package:just_audio/just_audio.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:random_music_player/widget/categories.dart';
-import 'package:random_music_player/widget/custom_audio_player.dart';
 import 'package:random_music_player/widget/music_play_bar.dart';
+import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 class Body extends StatefulWidget {
   Body({Key key, this.theme}) : super(key: key);
@@ -24,10 +24,10 @@ class _BodyState extends State<Body> {
   Random random;
   int selectedIndex;
   List<int> idList;
-  ConcatenatingAudioSource playList;
+  AudioPlayer audioPlayer;
   Map<String, dynamic> songsMap;
-  CustomAudioPlayer audioPlayer;
   CollectionReference cloudStore;
+  ConcatenatingAudioSource playList;
 
   @override
   void initState() {
@@ -39,16 +39,15 @@ class _BodyState extends State<Body> {
     random = Random();
     selectedIndex = 0;
     songsMap = <String, dynamic>{};
-    audioPlayer = CustomAudioPlayer();
+    audioPlayer = AudioPlayer();
     playList = ConcatenatingAudioSource(children: []);
     cloudStore = FirebaseFirestore.instance.collection('songs');
-
-    audioPlayer.setAudioSource(playList, initialIndex: 0);
+    // audioPlayer.setAudioSource(playList, initialIndex: 0);
 
     getData();
   }
 
-  void createMusciIdList() {
+  void createPlayList() async {
     while (idList.length < songsMap.length) {
       var id = random.nextInt(songsMap.length);
       while (idList.contains(id)) {
@@ -57,6 +56,22 @@ class _BodyState extends State<Body> {
       idList.add(id);
     }
 
+    for (var i = 0; i < 3; i++) {
+      print('url => ${songsMap['$i']['url']}');
+      await downloadMP3('${songsMap['$i']['url']}',
+          '${await _externalPath}/${songsMap['$i']['title']}.wav');
+    }
+    await audioPlayer.setAudioSource(
+        ConcatenatingAudioSource(children: [
+          AudioSource.uri(
+              Uri.file('${await _externalPath}/${songsMap['0']['title']}.wav')),
+          AudioSource.uri(
+              Uri.file('${await _externalPath}/${songsMap['1']['title']}.wav')),
+          AudioSource.uri(
+              Uri.file('${await _externalPath}/${songsMap['2']['title']}.wav')),
+        ]),
+        initialIndex: 0);
+    await audioPlayer.setLoopMode(LoopMode.all);
     print(idList);
   }
 
@@ -76,18 +91,7 @@ class _BodyState extends State<Body> {
       index++;
     }
 
-    // await audioPlayer.setAudioSource(
-    //     ConcatenatingAudioSource(children: [
-    //       AudioSource.uri(Uri.parse(
-    //           'https://firebasestorage.googleapis.com/v0/b/music-c5930.appspot.com/o/3.wav?alt=media&token=af960ab3-df45-4ee1-933d-e3b29b846766')),
-    //       AudioSource.uri(Uri.parse(
-    //           'https://firebasestorage.googleapis.com/v0/b/music-c5930.appspot.com/o/2.wav?alt=media&token=bd1d187f-f3ff-4dc8-9418-c9b56a0dd34f')),
-    //       AudioSource.uri(Uri.parse(
-    //           'https://firebasestorage.googleapis.com/v0/b/music-c5930.appspot.com/o/1.wav?alt=media&token=1fa8bd5f-e08e-444a-8792-5c4f5eb71ed8'))
-    //     ]),
-    //     initialIndex: 0);
-
-    createMusciIdList();
+    createPlayList();
 
     setState(() {
       isEmpty = false;
@@ -95,34 +99,90 @@ class _BodyState extends State<Body> {
   }
 
   Future<void> play(String option, {String deletePath}) async {
-    if (audioPlayer.playing) {
-      await audioPlayer.stop();
-    }
-    if (deletePath != null) {
-      var file = File(deletePath);
-      try {
-        await file.delete();
-      } catch (e) {
-        print(e);
-      }
-    }
+    // if (audioPlayer.playing) {
+    //   await audioPlayer.stop();
+    // }
+    // if (deletePath != null) {
+    //   var file = File(deletePath);
+    //   try {
+    //     if (await file.exists()) {
+    //       await file.delete();
+    //     }
+    //   } catch (e) {
+    //     print(e);
+    //   }
+    // }
 
-    if (option == 'backward') {
-      if (index == 0) {
-        index = playList.length;
-      }
-      index--;
-      print(playList[index]);
-    } else if (option == 'forward') {
-      if (index == playList.length - 1) {
-        index = -1;
-      }
-      index++;
-    }
+    // if (option == 'backward') {
+    //   if (index == 0) {
+    //     index = playList.length;
+    //   }
+    //   index--;
+    //   // print(playList[index]);
+    // } else if (option == 'forward') {
+    //   if (index == playList.length - 1) {
+    //     index = -1;
+    //   }
+    //   index++;
+    // }
 
-    path =
-        '${await _externalPath}/${songsMap['${idList[index]}']['title']}.wav';
-    await audioPlayer.startPlay('${songsMap['${idList[index]}']['url']}', path);
+    // print('index => $index');
+    // path =
+    //     '${await _externalPath}/${songsMap['${idList[index]}']['title']}.wav';
+    // var url = '${songsMap['${idList[index]}']['url']}';
+    // print(url);
+    // await downloadMP3(url, path);
+    // var duration = await audioPlayer.setFilePath(path);
+    // print(duration);
+    // // await audioPlayer.seekToNext();
+    // await audioPlayer.play();
+
+    if (option == 'backword') {
+      await audioPlayer.seekToPrevious();
+    } else if (option == 'forword') {
+      await audioPlayer.seekToNext();
+    } else if (option == '') {
+      await audioPlayer.play();
+      // this is soonLabs
+    }
+  }
+
+  String _cleanURL(String fullURL) {
+    String res;
+    if (fullURL.contains('https://www.youtube.com/watch?v=')) {
+      res = fullURL.replaceAll('https://www.youtube.com/watch?v=', '');
+    } else if (fullURL.contains('https://m.youtube.com/watch?v=')) {
+      res = fullURL.replaceAll('https://m.youtube.com/watch?v=', '');
+    } else if (fullURL.contains('https://youtu.be/')) {
+      res = fullURL.replaceAll('https://youtu.be/', '');
+    } else if (fullURL.length == 11) {
+      res = fullURL;
+    } else {
+      res = 'Unable URL';
+    }
+    return res;
+  }
+
+  Future<void> downloadMP3(String url, String path) async {
+    var yt = YoutubeExplode();
+    var vid = _cleanURL(url);
+    var manifest = await yt.videos.streamsClient.getManifest('$vid');
+    var streamInfo = manifest.audioOnly.withHighestBitrate();
+    // var size = streamInfo.size;
+    await writeStream(streamInfo, '$path');
+    print('다운로드 완료');
+  }
+
+  Future<void> writeStream(var streamInfo, String path) async {
+    if (streamInfo != null) {
+      var yt = YoutubeExplode();
+      var stream = yt.videos.streamsClient.get(streamInfo);
+      var file = File('$path');
+      var fileStream = file.openWrite();
+      await stream.pipe(fileStream);
+      await fileStream.flush();
+      await fileStream.close();
+    }
   }
 
   @override
@@ -139,7 +199,7 @@ class _BodyState extends State<Body> {
         children: [
           Container(
             width: maxWidth,
-            padding: EdgeInsets.all(5.0),
+            padding: EdgeInsets.fromLTRB(20, 5, 5, 5),
             child: Text(
               '내 취향인 가수의 노래',
               style: theme.textTheme.headline3,
@@ -169,31 +229,41 @@ class _BodyState extends State<Body> {
             child: Text('forward'),
           ),
           TextButton(
-            onPressed: () => play(''),
-            child: Text('play music'),
-          ),
-          TextButton(
             onPressed: () async {
-              var url = '${songsMap['${idList[index]}']['url']}';
-              path =
-                  '${await _externalPath}/${songsMap['${idList[index]}']['title']}.wav';
-              print(url + '\n');
-              var item = ProgressiveAudioSource(Uri.parse(path));
-              await audioPlayer.startPlay(url, path);
-              await playList.add(item);
-              await audioPlayer.setAudioSource(playList);
-              await audioPlayer.seekToNext();
-              await audioPlayer.play();
+              print('this is test audio play test');
+              // path = '${await _externalPath}/${songsMap['14']['title']}.wav';
+              // await audioPlayer.startPlay(
+              //     '${songsMap['14']['url']}', 'assets/musics/1.wav');
+              // await downloadMP3('${songsMap['14']['url']}', path);
+              // var duration = await testPlayer.setFilePath(path);
+              // print(duration);
+              // await testPlayer.play();
+              await play('');
             },
-            child: Text('play list test button'),
+            child: Text('test audio player music'),
           ),
-          TextButton(
-            onPressed: () {
-              audioPlayer.seekToNext();
-              audioPlayer.play();
-            },
-            child: Text('seek to next'),
-          ),
+          // TextButton(
+          //   onPressed: () async {
+          //     var url = '${songsMap['${idList[index]}']['url']}';
+          //     path =
+          //         '${await _externalPath}/${songsMap['${idList[index]}']['title']}.wav';
+          //     print(url + '\n');
+          //     var item = ProgressiveAudioSource(Uri.parse(path));
+          //     await audioPlayer.startPlay(url, path);
+          //     await playList.add(item);
+          //     await audioPlayer.setAudioSource(playList);
+          //     await audioPlayer.seekToNext();
+          //     await audioPlayer.play();
+          //   },
+          //   child: Text('play list test button'),
+          // ),
+          // TextButton(
+          //   onPressed: () {
+          //     audioPlayer.seekToNext();
+          //     audioPlayer.play();
+          //   },
+          //   child: Text('seek to next'),
+          // ),
           Container(
             width: maxWidth - 20,
             child: Card(

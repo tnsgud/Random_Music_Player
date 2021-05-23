@@ -34,7 +34,7 @@ dependencies:
   path_provider: ^2.0.1
   cloud_firestore: ^1.0.4
   permission_handler: ^6.1.1
-  youtube_explode_dart: ^1.9.1
+  youtube_explode_dart: ^1.9.4
   flutter_native_splash: ^1.1.7+1
   flutter_statusbarcolor: ^0.2.3
 

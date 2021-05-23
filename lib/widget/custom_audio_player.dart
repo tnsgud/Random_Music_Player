@@ -5,9 +5,10 @@ import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 class CustomAudioPlayer extends AudioPlayer {
   Future<void> startPlay(String url, String path) async {
     await downloadMP3(url, path);
+    print(url);
     print(path);
-    var durataion = setFilePath('$path');
-    print(await durataion);
+    var duration = await setFilePath(path);
+    print(duration);
     await play();
   }
 
@@ -45,6 +46,7 @@ class CustomAudioPlayer extends AudioPlayer {
       var fileStream = file.openWrite();
       await stream.pipe(fileStream);
       await fileStream.flush();
+      print(file.path);
       await fileStream.close();
     }
   }
