@@ -143,7 +143,6 @@ class _BodyState extends State<Body> {
       await audioPlayer.seekToNext();
     } else if (option == '') {
       await audioPlayer.play();
-      // this is soonLabs
     }
   }
 
