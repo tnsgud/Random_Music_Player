@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'screens/loding.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -10,6 +12,8 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
+  static Map<String, dynamic> songsMap;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -89,6 +93,10 @@ class MyApp extends StatelessWidget {
         bottomNavigationBarTheme:
             BottomNavigationBarThemeData(backgroundColor: Colors.black),
       ),
+      routes: {
+        '/loading': (context) => Loading(),
+        '/home': (context) => Home()
+      },
       home: HomePage(),
     );
   }
@@ -102,6 +110,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   bool _initialized = false;
   bool _error = false;
+  CollectionReference cloudStore;
 
   Future<void> initializeFlutterFire() async {
     try {
@@ -109,6 +118,8 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _initialized = true;
       });
+      cloudStore = FirebaseFirestore.instance.collection('songs');
+      await createData();
     } catch (e) {
       setState(() {
         _error = true;
@@ -119,8 +130,23 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
+
     initializeFlutterFire();
     storagePermission();
+
+    MyApp.songsMap = <String, dynamic>{};
+  }
+
+  Future<void> createData() async {
+    var docs;
+    var index = 0;
+    await cloudStore.get().then((value) => docs = value.docs);
+
+    for (var doc in docs) {
+      var tmpMap = doc.data();
+      MyApp.songsMap['$index'] = tmpMap;
+      index++;
+    }
   }
 
   void storagePermission() async {
@@ -134,6 +160,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     var theme = Theme.of(context);
+
     void _showError() {
       showDialog(
         context: context,
@@ -167,12 +194,10 @@ class _HomePageState extends State<HomePage> {
     if (_error) {
       _showError();
     } else if (!_initialized) {
-      print('Loading');
       return Loading();
     } else {
-      Timer(Duration(seconds: 3), () async {
-        await Navigator.push(
-            context, MaterialPageRoute(builder: (context) => Home()));
+      Timer(Duration(seconds: 5), () async {
+        await Navigator.popAndPushNamed(context, '/home');
       });
     }
 

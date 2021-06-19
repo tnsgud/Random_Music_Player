@@ -2,11 +2,13 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:random_music_player/main.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:random_music_player/widget/categories.dart';
 import 'package:random_music_player/widget/music_play_bar.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
+
+enum OPTIONS { backword, forword }
 
 class Body extends StatefulWidget {
   Body({Key key, this.theme}) : super(key: key);
@@ -18,61 +20,57 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  int index;
-  String path;
-  bool isEmpty;
+  int currentSongIndex;
+  bool isDone;
+  String currentSongPath;
   Random random;
   int selectedIndex;
   List<int> idList;
   AudioPlayer audioPlayer;
-  Map<String, dynamic> songsMap;
-  CollectionReference cloudStore;
   ConcatenatingAudioSource playList;
 
   @override
   void initState() {
     super.initState();
-    index = 0;
-    path = null;
+    currentSongIndex = 0;
+    currentSongPath = null;
     idList = <int>[];
-    isEmpty = true;
     random = Random();
+    isDone = false;
     selectedIndex = 0;
-    songsMap = <String, dynamic>{};
     audioPlayer = AudioPlayer();
     playList = ConcatenatingAudioSource(children: []);
-    cloudStore = FirebaseFirestore.instance.collection('songs');
-    // audioPlayer.setAudioSource(playList, initialIndex: 0);
 
-    getData();
+    createPlayList();
   }
 
   void createPlayList() async {
-    while (idList.length < songsMap.length) {
-      var id = random.nextInt(songsMap.length);
+    while (idList.length < MyApp.songsMap.length) {
+      var id = random.nextInt(MyApp.songsMap.length);
       while (idList.contains(id)) {
-        id = random.nextInt(songsMap.length);
+        id = random.nextInt(MyApp.songsMap.length);
       }
       idList.add(id);
     }
 
-    for (var i = 0; i < 3; i++) {
-      print('url => ${songsMap['$i']['url']}');
-      await downloadMP3('${songsMap['$i']['url']}',
-          '${await _externalPath}/${songsMap['$i']['title']}.wav');
+    for (var key in idList) {
+      currentSongPath =
+          '${await _externalPath}/${MyApp.songsMap['$key']['title']}.wav';
+      await playList.add(AudioSource.uri(Uri.parse(currentSongPath)));
     }
-    await audioPlayer.setAudioSource(
-        ConcatenatingAudioSource(children: [
-          AudioSource.uri(
-              Uri.file('${await _externalPath}/${songsMap['0']['title']}.wav')),
-          AudioSource.uri(
-              Uri.file('${await _externalPath}/${songsMap['1']['title']}.wav')),
-          AudioSource.uri(
-              Uri.file('${await _externalPath}/${songsMap['2']['title']}.wav')),
-        ]),
-        initialIndex: 0);
+
+    currentSongPath =
+        '${await _externalPath}/${MyApp.songsMap['${idList[0]}']['title']}.wav';
+    await downloadMP3(
+        '${MyApp.songsMap['${idList[0]}']['url']}', currentSongPath);
+
+    await audioPlayer.setAudioSource(playList, initialIndex: 0);
+
     await audioPlayer.setLoopMode(LoopMode.all);
-    print(idList);
+
+    setState(() {
+      isDone = true;
+    });
   }
 
   Future<String> get _externalPath async {
@@ -80,69 +78,38 @@ class _BodyState extends State<Body> {
     return directory.path;
   }
 
-  Future<void> getData() async {
-    var docs;
-    var index = 0;
-    await cloudStore.get().then((value) => docs = value.docs);
+  Future<void> musicControl({String option, String deletePath}) async {
+    await audioPlayer.pause();
 
-    for (var doc in docs) {
-      var songMap = doc.data();
-      songsMap['$index'] = songMap;
-      index++;
+    if (deletePath != null) {
+      var file = File(deletePath);
+      try {
+        if (await file.exists()) {
+          await file.delete();
+        }
+      } catch (e) {
+        print(e);
+      }
     }
 
-    createPlayList();
+    setState(() {
+      isDone = false;
+    });
+
+    currentSongPath =
+        '${await _externalPath}/${MyApp.songsMap['${idList[currentSongIndex]}']['title']}.wav';
+    await downloadMP3('${MyApp.songsMap['${idList[currentSongIndex]}']['url']}',
+        currentSongPath);
 
     setState(() {
-      isEmpty = false;
+      print('Done!');
+      isDone = true;
     });
-  }
 
-  Future<void> play(String option, {String deletePath}) async {
-    // if (audioPlayer.playing) {
-    //   await audioPlayer.stop();
-    // }
-    // if (deletePath != null) {
-    //   var file = File(deletePath);
-    //   try {
-    //     if (await file.exists()) {
-    //       await file.delete();
-    //     }
-    //   } catch (e) {
-    //     print(e);
-    //   }
-    // }
-
-    // if (option == 'backward') {
-    //   if (index == 0) {
-    //     index = playList.length;
-    //   }
-    //   index--;
-    //   // print(playList[index]);
-    // } else if (option == 'forward') {
-    //   if (index == playList.length - 1) {
-    //     index = -1;
-    //   }
-    //   index++;
-    // }
-
-    // print('index => $index');
-    // path =
-    //     '${await _externalPath}/${songsMap['${idList[index]}']['title']}.wav';
-    // var url = '${songsMap['${idList[index]}']['url']}';
-    // print(url);
-    // await downloadMP3(url, path);
-    // var duration = await audioPlayer.setFilePath(path);
-    // print(duration);
-    // // await audioPlayer.seekToNext();
-    // await audioPlayer.play();
-
-    if (option == 'backword') {
+    if (option == 'backward') {
       await audioPlayer.seekToPrevious();
     } else if (option == 'forword') {
       await audioPlayer.seekToNext();
-    } else if (option == '') {
-      await audioPlayer.play();
     }
   }
 
@@ -205,70 +172,46 @@ class _BodyState extends State<Body> {
               textAlign: TextAlign.start,
             ),
           ),
-          isEmpty
+          MyApp.songsMap.isEmpty
               ? Text('데이터가 없습니다.')
-              : Categories(categoriesMap: songsMap, theme: theme),
+              : Categories(theme: theme),
           TextButton(
-            onPressed: () {
-              print('audioPlayer => ${audioPlayer.playing}');
-              if (audioPlayer.playing) {
-                audioPlayer.pause();
-              } else {
-                audioPlayer.play();
-              }
-            },
+            onPressed: isDone
+                ? () async {
+                    print('audioPlayer => ${audioPlayer.playing}');
+                    if (audioPlayer.playing) {
+                      await audioPlayer.pause();
+                    } else {
+                      await audioPlayer.play();
+                    }
+                  }
+                : null,
             child: Text('play or pause'),
           ),
           TextButton(
-            onPressed: () => play('backward', deletePath: path),
+            onPressed: isDone
+                ? () async {
+                    if (currentSongIndex == 0) currentSongIndex = idList.length;
+                    currentSongIndex--;
+                    await musicControl(
+                        option: 'backward', deletePath: currentSongPath);
+                  }
+                : null,
             child: Text('backward'),
           ),
           TextButton(
-            onPressed: () => play('forward', deletePath: path),
+            onPressed: isDone
+                ? () async {
+                    if (currentSongIndex == idList.length - 1) {
+                      currentSongIndex = -1;
+                    }
+                    currentSongIndex++;
+                    await musicControl(
+                        option: 'forword', deletePath: currentSongPath);
+                  }
+                : null,
             child: Text('forward'),
           ),
-          TextButton(
-            onPressed: () async {
-              print('this is test audio play test');
-              // path = '${await _externalPath}/${songsMap['14']['title']}.wav';
-              // await audioPlayer.startPlay(
-              //     '${songsMap['14']['url']}', 'assets/musics/1.wav');
-              // await downloadMP3('${songsMap['14']['url']}', path);
-              // var duration = await testPlayer.setFilePath(path);
-              // print(duration);
-              // await testPlayer.play();
-              await play('');
-            },
-            child: Text('test audio player music'),
-          ),
-          // TextButton(
-          //   onPressed: () async {
-          //     var url = '${songsMap['${idList[index]}']['url']}';
-          //     path =
-          //         '${await _externalPath}/${songsMap['${idList[index]}']['title']}.wav';
-          //     print(url + '\n');
-          //     var item = ProgressiveAudioSource(Uri.parse(path));
-          //     await audioPlayer.startPlay(url, path);
-          //     await playList.add(item);
-          //     await audioPlayer.setAudioSource(playList);
-          //     await audioPlayer.seekToNext();
-          //     await audioPlayer.play();
-          //   },
-          //   child: Text('play list test button'),
-          // ),
-          // TextButton(
-          //   onPressed: () {
-          //     audioPlayer.seekToNext();
-          //     audioPlayer.play();
-          //   },
-          //   child: Text('seek to next'),
-          // ),
-          Container(
-            width: maxWidth - 20,
-            child: Card(
-              child: Text('SDfdsfsdfds'),
-            ),
-          )
         ],
       ),
       bottomNavigationBar: // buildBottomNavigationBar(theme),
@@ -281,7 +224,7 @@ class _BodyState extends State<Body> {
           children: [
             MusicPlayerBar(
               themeData: theme,
-              songsMap: songsMap,
+              songsMap: MyApp.songsMap,
               maxWidth: maxWidth,
               maxHeight: maxHeight,
             ),

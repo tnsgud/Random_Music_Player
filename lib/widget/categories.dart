@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:random_music_player/main.dart';
 
 class Categories extends StatefulWidget {
-  Categories({Key key, this.categoriesMap, this.theme}) : super(key: key);
+  Categories({Key key, this.theme}) : super(key: key);
 
-  final Map<String, dynamic> categoriesMap;
   final ThemeData theme;
 
   @override
@@ -11,23 +11,17 @@ class Categories extends StatefulWidget {
 }
 
 class _CategoriesState extends State<Categories> {
-  List<String> categoriesList = [];
-  Map<String, dynamic> categoriesMap;
+  List<String> categoriesList;
   ThemeData themeData;
 
   @override
   void initState() {
     super.initState();
+    categoriesList = [];
     themeData = widget.theme;
-    categoriesMap = widget.categoriesMap;
-    if (categoriesList.isNotEmpty) {
-      for (var i = 0; i < categoriesList.length; i++) {
-        categoriesList.remove(0);
-      }
-    }
 
-    for (var i = 0; i < categoriesMap.length; i++) {
-      categoriesList.add(categoriesMap['$i']['title']);
+    for (var i = 0; i < 10; i++) {
+      categoriesList.add(MyApp.songsMap['$i']['title']);
     }
   }
 
