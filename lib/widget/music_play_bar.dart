@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:random_music_player/main.dart';
 
 class MusicPlayerBar extends StatefulWidget {
   const MusicPlayerBar(
       {Key key,
       @required this.themeData,
-      @required this.songsMap,
       @required this.maxWidth,
       @required this.maxHeight})
       : super(key: key);
 
   final ThemeData themeData;
-  final Map<String, dynamic> songsMap;
   final num maxWidth;
   final num maxHeight;
 
@@ -22,7 +21,6 @@ class _MusicPlayerBarState extends State<MusicPlayerBar> {
   num maxWidth;
   num maxHeight;
   ThemeData themeData;
-  Map<String, dynamic> songsMap;
 
   @override
   void initState() {
@@ -30,7 +28,6 @@ class _MusicPlayerBarState extends State<MusicPlayerBar> {
     maxWidth = widget.maxWidth;
     maxHeight = widget.maxHeight;
     themeData = widget.themeData;
-    songsMap = widget.songsMap;
   }
 
   @override
@@ -63,10 +60,19 @@ class _MusicPlayerBarState extends State<MusicPlayerBar> {
               Container(
                   width: maxWidth * 0.08,
                   child: IconButton(
-                      icon: Icon(Icons.arrow_back_ios),
-                      onPressed: () {
-                        print('back');
-                      })),
+                    icon: Icon(Icons.arrow_back_ios),
+                    onPressed: true
+                        ? () async {
+                            print(
+                                'audioPlayer => ${MyApp.audioPlayer.playing}');
+                            if (MyApp.audioPlayer.playing) {
+                              await MyApp.audioPlayer.pause();
+                            } else {
+                              await MyApp.audioPlayer.play();
+                            }
+                          }
+                        : null,
+                  )),
               Container(
                   width: maxWidth * 0.08,
                   child: IconButton(
