@@ -37,6 +37,7 @@ dependencies:
     youtube_explode_dart: ^1.9.4
     flutter_statusbarcolor: ^0.2.3
     flutter_native_splash: ^1.1.7+1
+    audio_video_progress_bar: ^0.4.0
 
 dev_dependencies:
     flutter_test:

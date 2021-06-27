@@ -1,17 +1,13 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:rxdart/rxdart.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:random_music_player/main.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:random_music_player/widget/categories.dart';
-<<<<<<< HEAD
-=======
-// import 'package:random_music_player/widget/music_play_bar.dart';
->>>>>>> a5be0b85b5733fa831a0a009a5ba67cf2df385b0
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
-
-enum OPTIONS { backword, forword }
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 
 class Body extends StatefulWidget {
   Body({Key key, this.theme}) : super(key: key);
@@ -29,26 +25,31 @@ class _BodyState extends State<Body> {
   int selectedIndex;
   int currentSongIndex;
   String currentSongPath;
-<<<<<<< HEAD
   double currentLocation;
-  AudioPlayer audioPlayer;
-=======
->>>>>>> a5be0b85b5733fa831a0a009a5ba67cf2df385b0
   ConcatenatingAudioSource playList;
+  Stream<DurationState> _durationState;
 
   @override
   void initState() {
     super.initState();
-    isDone = false;
-    idList = <int>[];
-    random = Random();
-    selectedIndex = 0;
     currentSongIndex = 0;
     currentSongPath = null;
+    idList = <int>[];
+    random = Random();
+    isDone = false;
+    selectedIndex = 0;
     playList = ConcatenatingAudioSource(children: []);
     currentLocation = 0;
 
     createPlayList();
+
+    _durationState = Rx.combineLatest2<Duration, PlaybackEvent, DurationState>(
+        MyApp.audioPlayer.positionStream,
+        MyApp.audioPlayer.playbackEventStream,
+        (position, playbackEvent) => DurationState(
+            progress: position,
+            buffered: playbackEvent.bufferedPosition,
+            total: playbackEvent.duration));
   }
 
   void createPlayList() async {
@@ -182,133 +183,157 @@ class _BodyState extends State<Body> {
           MyApp.songsMap.isEmpty
               ? Text('데이터가 없습니다.')
               : Categories(theme: theme),
-
-
-          // buildProgressBar(),
         ],
       ),
-      bottomNavigationBar: // buildBottomNavigationBar(theme),
-          Container(
-        color: Colors.white,
-        width: maxWidth,
-        height: maxHeight * 0.1,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-          ],),)
+      bottomNavigationBar: musicPlayBar(
+        theme: theme,
+        maxWidth: maxWidth,
+        maxHeight: maxHeight,
+      ),
     );
   }
 
   Widget musicPlayBar({ThemeData theme, double maxWidth, double maxHeight}) {
+    var slider = Slider(
+      value: isDone ? MyApp.audioPlayer.position.inMilliseconds.toDouble() : 0,
+      onChanged: isDone
+          ? (newPosition) {
+              setState(() {
+                MyApp.audioPlayer
+                    .seek(Duration(milliseconds: newPosition.round()));
+              });
+            }
+          : null,
+      min: 0,
+      max: isDone ? MyApp.audioPlayer.duration.inMilliseconds.toDouble() : 1,
+      autofocus: true,
+    );
+
     return Container(
-        color: Colors.amber,
-        padding: EdgeInsets.all(5),
-        width: maxWidth,
-        height: maxHeight * 0.1,
-        child: Row(
-          children: [
-            Image.network(
-              'https://cdnimg.melon.co.kr/cm2/album/images/105/54/246/10554246_20210325161233_500.jpg?304eb9ed9c07a16ec6d6e000dc0e7d91/melon/resize/282/quality/80/optimize',
-            ),
-            Column(
+      color: Colors.amber,
+      padding: EdgeInsets.all(5),
+      width: maxWidth,
+      height: maxHeight * 0.11,
+      child: Row(
+        children: [
+          Image.network(
+            'https://cdnimg.melon.co.kr/cm2/album/images/105/54/246/10554246_20210325161233_500.jpg?304eb9ed9c07a16ec6d6e000dc0e7d91/melon/resize/282/quality/80/optimize',
+          ),
+          Container(
+            padding: EdgeInsets.only(left: 10.0),
+            width: maxWidth * 0.45,
+            child: Column(
               children: [
                 Text(
-                  MyApp.songsMap['${idList[currentSongIndex]}']['title'],
+                  "${MyApp.songsMap['${idList[currentSongIndex]}']['title']} - ${MyApp.songsMap['${idList[currentSongIndex]}']['singer']}",
                   style: theme.textTheme.bodyText1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                Slider(
-                  value: audioPlayer.position.inMilliseconds.toDouble(),
-
-                  onChanged: (newPosition) {
-                    setState(() {
-                      audioPlayer
-                          .seek(Duration(milliseconds: newPosition.round()));
-                    });
-                  },
-                  min: 0,
-                  max: audioPlayer.duration.inMilliseconds.toDouble(),
-                ),
+                music_progress_bar()
               ],
             ),
-          ],
-=======
-  Widget MusicPlayerBar(
-      {ThemeData themeData, double maxWidth, double maxHeight}) {
-    return Container(
-        color: Colors.blue,
-        width: maxWidth,
-        height: maxHeight * 0.1,
-        child: Padding(
-          padding: const EdgeInsets.all(5.0),
-          child: Row(
-            children: [
-              Container(
-                  width: maxWidth * 0.15,
-                  child: Image.network(
-                      'https://cdnimg.melon.co.kr/cm2/album/images/105/54/246/10554246_20210325161233_500.jpg?304eb9ed9c07a16ec6d6e000dc0e7d91/melon/resize/282/quality/80/optimize')),
-              Container(
-                  color: Colors.black,
-                  width: maxWidth * 0.58,
-                  child: Padding(
-                    padding: const EdgeInsets.all(2.0),
-                    child: Column(
-                      children: [Text('hello world')],
-                    ),
-                  )),
-              Container(
-                  width: maxWidth * 0.08,
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back_ios_rounded),
-                    onPressed: isDone
-                        ? () async {
-                            if (currentSongIndex == 0) {
-                              currentSongIndex = idList.length;
-                            }
-                            currentSongIndex--;
-                            await musicControl(
-                                option: 'backward',
-                                deletePath: currentSongPath);
-                          }
-                        : null,
-                  )),
-              Container(
-                  width: maxWidth * 0.08,
-                  child: IconButton(
-                    icon: MyApp.audioPlayer.playing
-                        ? Icon(Icons.pause)
-                        : Icon(Icons.play_arrow_rounded),
-                    onPressed: isDone
-                        ? () async {
-                            if (MyApp.audioPlayer.playing) {
-                              setState(() {
-                                MyApp.audioPlayer.pause();
-                              });
-                            } else {
-                              setState(() {
-                                MyApp.audioPlayer.play();
-                              });
-                            }
-                          }
-                        : null,
-                  )),
-              Container(
-                  width: maxWidth * 0.08,
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_forward_ios_rounded),
-                    onPressed: isDone
-                        ? () async {
-                            if (currentSongIndex == idList.length - 1) {
-                              currentSongIndex = -1;
-                            }
-                            currentSongIndex++;
-                            await musicControl(
-                                option: 'forword', deletePath: currentSongPath);
-                          }
-                        : null,
-                  )),
-            ],
           ),
->>>>>>> a5be0b85b5733fa831a0a009a5ba67cf2df385b0
-        ));
+          SizedBox(
+            width: maxWidth * 0.1,
+            height: maxHeight * 0.1,
+            child: IconButton(
+              onPressed: isDone
+                  ? () async {
+                      if (currentSongIndex == 0) {
+                        currentSongIndex = idList.length;
+                      }
+                      currentSongIndex--;
+                      await musicControl(
+                          option: 'backward', deletePath: currentSongPath);
+                    }
+                  : null,
+              icon: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 50,
+              ),
+            ),
+          ),
+          SizedBox(
+            width: maxWidth * 0.1,
+            height: maxHeight * 0.1,
+            child: IconButton(
+              onPressed: isDone
+                  ? () {
+                      if (MyApp.audioPlayer.playing) {
+                        setState(() {
+                          MyApp.audioPlayer.pause();
+                        });
+                      } else {
+                        setState(() {
+                          MyApp.audioPlayer.play();
+                        });
+                      }
+                    }
+                  : null,
+              icon: MyApp.audioPlayer.playing
+                  ? Icon(
+                      Icons.pause_rounded,
+                      size: 50,
+                    )
+                  : Icon(
+                      Icons.play_arrow_rounded,
+                      size: 50,
+                    ),
+            ),
+          ),
+          SizedBox(
+            width: maxWidth * 0.1,
+            height: maxHeight * 0.1,
+            child: IconButton(
+              onPressed: isDone
+                  ? () async {
+                      if (currentSongIndex == idList.length - 1) {
+                        currentSongIndex = -1;
+                      }
+                      currentSongIndex++;
+                      await musicControl(
+                          option: 'forword', deletePath: currentSongPath);
+                    }
+                  : null,
+              icon: Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 50,
+              ),
+            ),
+          )
+        ],
+      ),
+    );
   }
+
+  StreamBuilder<DurationState> music_progress_bar() {
+    return StreamBuilder(
+        stream: _durationState,
+        builder: (context, snapshot) {
+          final durationState = snapshot.data;
+          final progress = durationState?.progress ?? Duration.zero;
+          final buffered = durationState?.buffered ?? Duration.zero;
+          final total = durationState?.total ?? Duration.zero;
+          return ProgressBar(
+            progress: progress,
+            buffered: buffered,
+            total: total,
+            onSeek: (duration) {
+              MyApp.audioPlayer.seek(duration);
+            },
+            timeLabelLocation: TimeLabelLocation.none,
+          );
+        });
+  }
+}
+
+class DurationState {
+  const DurationState({
+    this.progress,
+    this.buffered,
+    this.total,
+  });
+  final Duration progress;
+  final Duration buffered;
+  final Duration total;
 }
