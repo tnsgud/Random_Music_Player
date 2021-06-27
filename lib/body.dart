@@ -5,7 +5,6 @@ import 'package:just_audio/just_audio.dart';
 import 'package:random_music_player/main.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:random_music_player/widget/categories.dart';
-import 'package:random_music_player/widget/music_play_bar.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 enum OPTIONS { backword, forword }
@@ -20,12 +19,13 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  int currentSongIndex;
   bool isDone;
-  String currentSongPath;
   Random random;
-  int selectedIndex;
   List<int> idList;
+  int selectedIndex;
+  int currentSongIndex;
+  String currentSongPath;
+  double currentLocation;
   AudioPlayer audioPlayer;
   ConcatenatingAudioSource playList;
 
@@ -40,6 +40,7 @@ class _BodyState extends State<Body> {
     selectedIndex = 0;
     audioPlayer = AudioPlayer();
     playList = ConcatenatingAudioSource(children: []);
+    currentLocation = 0;
 
     createPlayList();
   }
@@ -101,16 +102,16 @@ class _BodyState extends State<Body> {
     await downloadMP3('${MyApp.songsMap['${idList[currentSongIndex]}']['url']}',
         currentSongPath);
 
-    setState(() {
-      print('Done!');
-      isDone = true;
-    });
-
     if (option == 'backward') {
       await audioPlayer.seekToPrevious();
     } else if (option == 'forword') {
       await audioPlayer.seekToNext();
     }
+
+    setState(() {
+      print('Done!');
+      isDone = true;
+    });
   }
 
   String _cleanURL(String fullURL) {
@@ -212,45 +213,52 @@ class _BodyState extends State<Body> {
                 : null,
             child: Text('forward'),
           ),
+
+          // buildProgressBar(),
         ],
       ),
-      bottomNavigationBar: // buildBottomNavigationBar(theme),
-          Container(
-        color: Colors.white,
-        width: maxWidth,
-        height: maxHeight * 0.18,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            MusicPlayerBar(
-              themeData: theme,
-              songsMap: MyApp.songsMap,
+      bottomNavigationBar: isDone
+          ? musicPlayBar(
+              theme: theme,
               maxWidth: maxWidth,
               maxHeight: maxHeight,
-            ),
-            //buildBottomNavigationBar(theme)
-          ],
-        ),
-      ),
+            )
+          : null,
     );
   }
 
-  BottomNavigationBar buildBottomNavigationBar(ThemeData theme) {
-    return BottomNavigationBar(
-        backgroundColor: theme.primaryColor,
-        onTap: (value) {
-          setState(() {
-            selectedIndex = value;
-          });
-        },
-        selectedItemColor: theme.accentColor,
-        unselectedItemColor: Colors.grey,
-        currentIndex: selectedIndex,
-        items: [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: '둘러보기'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: '검색'),
-        ]);
+  Widget musicPlayBar({ThemeData theme, double maxWidth, double maxHeight}) {
+    return Container(
+        color: Colors.amber,
+        padding: EdgeInsets.all(5),
+        width: maxWidth,
+        height: maxHeight * 0.1,
+        child: Row(
+          children: [
+            Image.network(
+              'https://cdnimg.melon.co.kr/cm2/album/images/105/54/246/10554246_20210325161233_500.jpg?304eb9ed9c07a16ec6d6e000dc0e7d91/melon/resize/282/quality/80/optimize',
+            ),
+            Column(
+              children: [
+                Text(
+                  MyApp.songsMap['${idList[currentSongIndex]}']['title'],
+                  style: theme.textTheme.bodyText1,
+                ),
+                Slider(
+                  value: audioPlayer.position.inMilliseconds.toDouble(),
+
+                  onChanged: (newPosition) {
+                    setState(() {
+                      audioPlayer
+                          .seek(Duration(milliseconds: newPosition.round()));
+                    });
+                  },
+                  min: 0,
+                  max: audioPlayer.duration.inMilliseconds.toDouble(),
+                ),
+              ],
+            ),
+          ],
+        ));
   }
 }
