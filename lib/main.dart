@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:random_music_player/screens/home.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:just_audio/just_audio.dart';
 
 void main() {
   runApp(MyApp());
@@ -13,6 +14,7 @@ void main() {
 
 class MyApp extends StatelessWidget {
   static Map<String, dynamic> songsMap;
+  static AudioPlayer audioPlayer;
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +137,7 @@ class _HomePageState extends State<HomePage> {
     storagePermission();
 
     MyApp.songsMap = <String, dynamic>{};
+    MyApp.audioPlayer = AudioPlayer();
   }
 
   Future<void> createData() async {

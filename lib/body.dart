@@ -5,6 +5,10 @@ import 'package:just_audio/just_audio.dart';
 import 'package:random_music_player/main.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:random_music_player/widget/categories.dart';
+<<<<<<< HEAD
+=======
+// import 'package:random_music_player/widget/music_play_bar.dart';
+>>>>>>> a5be0b85b5733fa831a0a009a5ba67cf2df385b0
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
 enum OPTIONS { backword, forword }
@@ -25,20 +29,22 @@ class _BodyState extends State<Body> {
   int selectedIndex;
   int currentSongIndex;
   String currentSongPath;
+<<<<<<< HEAD
   double currentLocation;
   AudioPlayer audioPlayer;
+=======
+>>>>>>> a5be0b85b5733fa831a0a009a5ba67cf2df385b0
   ConcatenatingAudioSource playList;
 
   @override
   void initState() {
     super.initState();
-    currentSongIndex = 0;
-    currentSongPath = null;
+    isDone = false;
     idList = <int>[];
     random = Random();
-    isDone = false;
     selectedIndex = 0;
-    audioPlayer = AudioPlayer();
+    currentSongIndex = 0;
+    currentSongPath = null;
     playList = ConcatenatingAudioSource(children: []);
     currentLocation = 0;
 
@@ -65,9 +71,9 @@ class _BodyState extends State<Body> {
     await downloadMP3(
         '${MyApp.songsMap['${idList[0]}']['url']}', currentSongPath);
 
-    await audioPlayer.setAudioSource(playList, initialIndex: 0);
+    await MyApp.audioPlayer.setAudioSource(playList, initialIndex: 0);
 
-    await audioPlayer.setLoopMode(LoopMode.all);
+    await MyApp.audioPlayer.setLoopMode(LoopMode.all);
 
     setState(() {
       isDone = true;
@@ -80,7 +86,7 @@ class _BodyState extends State<Body> {
   }
 
   Future<void> musicControl({String option, String deletePath}) async {
-    await audioPlayer.pause();
+    await MyApp.audioPlayer.pause();
 
     if (deletePath != null) {
       var file = File(deletePath);
@@ -103,9 +109,9 @@ class _BodyState extends State<Body> {
         currentSongPath);
 
     if (option == 'backward') {
-      await audioPlayer.seekToPrevious();
+      await MyApp.audioPlayer.seekToPrevious();
     } else if (option == 'forword') {
-      await audioPlayer.seekToNext();
+      await MyApp.audioPlayer.seekToNext();
     }
 
     setState(() {
@@ -176,54 +182,20 @@ class _BodyState extends State<Body> {
           MyApp.songsMap.isEmpty
               ? Text('데이터가 없습니다.')
               : Categories(theme: theme),
-          TextButton(
-            onPressed: isDone
-                ? () async {
-                    print('audioPlayer => ${audioPlayer.playing}');
-                    if (audioPlayer.playing) {
-                      await audioPlayer.pause();
-                    } else {
-                      await audioPlayer.play();
-                    }
-                  }
-                : null,
-            child: Text('play or pause'),
-          ),
-          TextButton(
-            onPressed: isDone
-                ? () async {
-                    if (currentSongIndex == 0) currentSongIndex = idList.length;
-                    currentSongIndex--;
-                    await musicControl(
-                        option: 'backward', deletePath: currentSongPath);
-                  }
-                : null,
-            child: Text('backward'),
-          ),
-          TextButton(
-            onPressed: isDone
-                ? () async {
-                    if (currentSongIndex == idList.length - 1) {
-                      currentSongIndex = -1;
-                    }
-                    currentSongIndex++;
-                    await musicControl(
-                        option: 'forword', deletePath: currentSongPath);
-                  }
-                : null,
-            child: Text('forward'),
-          ),
+
 
           // buildProgressBar(),
         ],
       ),
-      bottomNavigationBar: isDone
-          ? musicPlayBar(
-              theme: theme,
-              maxWidth: maxWidth,
-              maxHeight: maxHeight,
-            )
-          : null,
+      bottomNavigationBar: // buildBottomNavigationBar(theme),
+          Container(
+        color: Colors.white,
+        width: maxWidth,
+        height: maxHeight * 0.1,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+          ],),)
     );
   }
 
@@ -259,6 +231,84 @@ class _BodyState extends State<Body> {
               ],
             ),
           ],
+=======
+  Widget MusicPlayerBar(
+      {ThemeData themeData, double maxWidth, double maxHeight}) {
+    return Container(
+        color: Colors.blue,
+        width: maxWidth,
+        height: maxHeight * 0.1,
+        child: Padding(
+          padding: const EdgeInsets.all(5.0),
+          child: Row(
+            children: [
+              Container(
+                  width: maxWidth * 0.15,
+                  child: Image.network(
+                      'https://cdnimg.melon.co.kr/cm2/album/images/105/54/246/10554246_20210325161233_500.jpg?304eb9ed9c07a16ec6d6e000dc0e7d91/melon/resize/282/quality/80/optimize')),
+              Container(
+                  color: Colors.black,
+                  width: maxWidth * 0.58,
+                  child: Padding(
+                    padding: const EdgeInsets.all(2.0),
+                    child: Column(
+                      children: [Text('hello world')],
+                    ),
+                  )),
+              Container(
+                  width: maxWidth * 0.08,
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back_ios_rounded),
+                    onPressed: isDone
+                        ? () async {
+                            if (currentSongIndex == 0) {
+                              currentSongIndex = idList.length;
+                            }
+                            currentSongIndex--;
+                            await musicControl(
+                                option: 'backward',
+                                deletePath: currentSongPath);
+                          }
+                        : null,
+                  )),
+              Container(
+                  width: maxWidth * 0.08,
+                  child: IconButton(
+                    icon: MyApp.audioPlayer.playing
+                        ? Icon(Icons.pause)
+                        : Icon(Icons.play_arrow_rounded),
+                    onPressed: isDone
+                        ? () async {
+                            if (MyApp.audioPlayer.playing) {
+                              setState(() {
+                                MyApp.audioPlayer.pause();
+                              });
+                            } else {
+                              setState(() {
+                                MyApp.audioPlayer.play();
+                              });
+                            }
+                          }
+                        : null,
+                  )),
+              Container(
+                  width: maxWidth * 0.08,
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_forward_ios_rounded),
+                    onPressed: isDone
+                        ? () async {
+                            if (currentSongIndex == idList.length - 1) {
+                              currentSongIndex = -1;
+                            }
+                            currentSongIndex++;
+                            await musicControl(
+                                option: 'forword', deletePath: currentSongPath);
+                          }
+                        : null,
+                  )),
+            ],
+          ),
+>>>>>>> a5be0b85b5733fa831a0a009a5ba67cf2df385b0
         ));
   }
 }
