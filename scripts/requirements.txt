@@ -1,2 +1,4 @@
 firebase_admin
 colorama
+requests
+BeautifulSoup4

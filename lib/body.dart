@@ -76,9 +76,11 @@ class _BodyState extends State<Body> {
 
     await MyApp.audioPlayer.setLoopMode(LoopMode.all);
 
-    setState(() {
-      isDone = true;
-    });
+    if (mounted) {
+      setState(() {
+        isDone = true;
+      });
+    }
   }
 
   Future<String> get _externalPath async {
@@ -100,9 +102,11 @@ class _BodyState extends State<Body> {
       }
     }
 
-    setState(() {
-      isDone = false;
-    });
+    if (mounted) {
+      setState(() {
+        isDone = false;
+      });
+    }
 
     currentSongPath =
         '${await _externalPath}/${MyApp.songsMap['${idList[currentSongIndex]}']['title']}.wav';
@@ -194,21 +198,6 @@ class _BodyState extends State<Body> {
   }
 
   Widget musicPlayBar({ThemeData theme, double maxWidth, double maxHeight}) {
-    var slider = Slider(
-      value: isDone ? MyApp.audioPlayer.position.inMilliseconds.toDouble() : 0,
-      onChanged: isDone
-          ? (newPosition) {
-              setState(() {
-                MyApp.audioPlayer
-                    .seek(Duration(milliseconds: newPosition.round()));
-              });
-            }
-          : null,
-      min: 0,
-      max: isDone ? MyApp.audioPlayer.duration.inMilliseconds.toDouble() : 1,
-      autofocus: true,
-    );
-
     return Container(
       color: Colors.amber,
       padding: EdgeInsets.all(5),
